@@ -1,4 +1,4 @@
-use bevy::{core_pipeline::prepass::MotionVectorPrepass, prelude::*};
+use bevy::prelude::*;
 
 const PARAKEET_SIZE: Vec2 = Vec2::new(60.0, 60.0);
 const PARAKEET_SPEED: f32 = 400.0;
@@ -41,10 +41,16 @@ fn move_parakeet(
     parakeet.translation.x += direction * PARAKEET_SPEED * time.delta_secs();
 }
 
+fn basic_keys(input: Res<ButtonInput<KeyCode>>, mut exit: EventWriter<AppExit>) {
+    if input.pressed(KeyCode::Escape) {
+        exit.write(AppExit::Success);
+    }
+}
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup)
-        .add_systems(Update, move_parakeet)
+        .add_systems(Update, (move_parakeet, basic_keys))
         .run();
 }
