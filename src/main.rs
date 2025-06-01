@@ -2,6 +2,8 @@ use bevy::prelude::*;
 
 const PARAKEET_SIZE: Vec2 = Vec2::new(60.0, 60.0);
 const PARAKEET_SPEED: f32 = 400.0;
+const INVADER_ROWS: u32 = 3;
+const INVADER_COLS: u32 = 7;
 
 #[derive(Component)]
 struct Collider;
@@ -9,18 +11,45 @@ struct Collider;
 #[derive(Component)]
 struct Parakeet;
 
-fn setup(mut commands: Commands) {
+#[derive(Component)]
+struct Invader;
+
+fn setup(mut commands: Commands, windows: Query<&mut Window>) {
+    let window = windows.single().unwrap();
+    let width = window.resolution.width();
+    let height = window.resolution.height();
     commands.spawn(Camera2d);
     commands.spawn((
         Parakeet,
+        Collider,
         Sprite::from_color(Color::WHITE, Vec2::ONE),
         Transform {
             translation: Vec3::new(0.0, -300.0, 0.0),
             scale: PARAKEET_SIZE.extend(1.0),
             ..default()
         },
-        Collider,
     ));
+    for row in 0..INVADER_ROWS {
+        for col in 0..INVADER_COLS {
+            let (x, y) = invader_position(width, height, col, row);
+            commands.spawn((
+                Invader,
+                Collider,
+                Sprite::from_color(Color::srgb(0.1, 0.9, 0.15), Vec2::ONE),
+                Transform {
+                    translation: Vec3::new(x, 400.0 - y, 0.0),
+                    scale: PARAKEET_SIZE.extend(1.0),
+                    ..default()
+                },
+            ));
+        }
+    }
+}
+
+fn invader_position(width: f32, height: f32, col: u32, row: u32) -> (f32, f32) {
+    let x = (col as f32 + 1.0) * width / (INVADER_COLS as f32 + 1.0) - width / 2.0;
+    let y = (row as f32 + 1.0) * height / (2.0 * INVADER_ROWS as f32 + 1.0);
+    (x, y)
 }
 
 fn move_parakeet(
