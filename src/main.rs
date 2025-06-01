@@ -55,8 +55,11 @@ fn invader_position(width: f32, height: f32, col: u32, row: u32) -> (f32, f32) {
 fn move_parakeet(
     input: Res<ButtonInput<KeyCode>>,
     mut parakeet: Single<&mut Transform, With<Parakeet>>,
+    windows: Query<&mut Window>,
     time: Res<Time>,
 ) {
+    let window = windows.single().unwrap();
+    let w_max = window.resolution.width() / 2.0;
     let mut direction = 0.0;
 
     if input.pressed(KeyCode::KeyH) {
@@ -67,7 +70,14 @@ fn move_parakeet(
         direction += 1.0;
     }
 
-    parakeet.translation.x += direction * PARAKEET_SPEED * time.delta_secs();
+    let new_x = parakeet.translation.x + direction * PARAKEET_SPEED * time.delta_secs();
+    if new_x < -w_max {
+        parakeet.translation.x = -w_max;
+    } else if new_x > w_max {
+        parakeet.translation.x = w_max;
+    } else {
+        parakeet.translation.x = new_x;
+    }
 }
 
 fn basic_keys(input: Res<ButtonInput<KeyCode>>, mut exit: EventWriter<AppExit>) {
