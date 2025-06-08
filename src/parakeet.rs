@@ -2,7 +2,7 @@ use crate::{PARAKEET_SIZE, PARAKEET_SPEED};
 use bevy::prelude::*;
 
 #[derive(Component)]
-pub struct Parakeet;
+struct Parakeet;
 
 pub struct ParakeetPlugin;
 
@@ -25,7 +25,7 @@ fn setup(mut commands: Commands) {
     ));
 }
 
-pub fn move_parakeet(
+fn move_parakeet(
     input: Res<ButtonInput<KeyCode>>,
     mut parakeet: Single<&mut Transform, With<Parakeet>>,
     windows: Query<&mut Window>,
