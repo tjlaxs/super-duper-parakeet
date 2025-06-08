@@ -2,7 +2,7 @@ use crate::{PARAKEET_SIZE, PARAKEET_SPEED};
 use bevy::prelude::*;
 
 #[derive(Component)]
-struct Parakeet;
+pub struct Parakeet;
 
 pub struct ParakeetPlugin;
 
