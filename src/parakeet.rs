@@ -4,11 +4,15 @@ use bevy::prelude::*;
 #[derive(Component)]
 struct Parakeet;
 
+#[derive(Component)]
+struct Bullet(f32);
+
 pub struct ParakeetPlugin;
 
 impl Plugin for ParakeetPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
+            .add_systems(Update, (bullet_time, shoot).chain())
             .add_systems(Update, move_parakeet);
     }
 }
@@ -23,6 +27,38 @@ fn setup(mut commands: Commands) {
             ..default()
         },
     ));
+}
+
+fn shoot(
+    mut commands: Commands,
+    input: Res<ButtonInput<KeyCode>>,
+    parakeet: Single<&mut Transform, With<Parakeet>>,
+) {
+    if input.just_pressed(KeyCode::KeyF) {
+        commands.spawn((
+            Bullet(200.),
+            Transform::from_translation(parakeet.translation)
+                .with_scale(PARAKEET_SIZE.extend(1.0) * 0.2),
+            Sprite::from_color(Color::hsl(50., 0.5, 0.5), Vec2::ONE),
+        ));
+    }
+}
+
+fn bullet_time(
+    mut commands: Commands,
+    bullets: Query<(Entity, &Bullet, &mut Transform)>,
+    windows: Query<&mut Window>,
+    time: Res<Time>,
+) {
+    let window = windows.single().unwrap();
+    let h_max = (window.resolution.height() + PARAKEET_SIZE.y) / 2.;
+    for (e, Bullet(dir), mut t) in bullets {
+        if t.translation.y > h_max {
+            commands.entity(e).despawn();
+            break;
+        }
+        t.translation.y += dir * time.delta_secs();
+    }
 }
 
 fn move_parakeet(
