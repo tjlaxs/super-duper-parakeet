@@ -1,4 +1,6 @@
+use crate::bullet::Bullet;
 use crate::{INVADER_COLS, INVADER_ROWS, INVADER_SPEED, PARAKEET_SIZE};
+use bevy::math::bounding::{Aabb2d, IntersectsVolume};
 use bevy::prelude::*;
 
 #[derive(Clone, Copy)]
@@ -6,6 +8,9 @@ enum HorizontalMovement {
     Left = -1,
     Right = 1,
 }
+
+#[derive(Component)]
+struct Collider;
 
 #[derive(Resource)]
 struct InvaderMovement(HorizontalMovement);
@@ -18,7 +23,7 @@ pub struct InvaderPlugin;
 impl Plugin for InvaderPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
-            .add_systems(Update, move_invader);
+            .add_systems(Update, (move_invader, collider).chain());
     }
 }
 
@@ -45,6 +50,23 @@ fn setup(mut commands: Commands, windows: Query<&mut Window>) {
                     ..default()
                 },
             ));
+        }
+    }
+}
+
+fn collider(
+    mut commands: Commands,
+    bullets: Query<(Entity, &Transform), With<Bullet>>,
+    invaders: Query<(Entity, &Transform), With<Invader>>,
+) {
+    for (be, bt) in bullets {
+        for (ie, it) in invaders {
+            let bullet_aabb = Aabb2d::new(bt.translation.xy(), PARAKEET_SIZE / 2.0 / 5.0);
+            let invader_aabb = Aabb2d::new(it.translation.xy(), PARAKEET_SIZE / 2.0);
+            if bullet_aabb.intersects(&invader_aabb) {
+                commands.entity(be).despawn();
+                commands.entity(ie).despawn();
+            }
         }
     }
 }
