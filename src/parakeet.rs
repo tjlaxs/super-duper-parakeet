@@ -1,11 +1,9 @@
+use crate::bullet::Bullet;
 use crate::{PARAKEET_SIZE, PARAKEET_SPEED};
 use bevy::prelude::*;
 
 #[derive(Component)]
 struct Parakeet;
-
-#[derive(Component)]
-struct Bullet(f32);
 
 pub struct ParakeetPlugin;
 

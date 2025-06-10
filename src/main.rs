@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+mod bullet;
+
 mod parakeet;
 use parakeet::ParakeetPlugin;
 
