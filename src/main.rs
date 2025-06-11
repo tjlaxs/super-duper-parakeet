@@ -13,6 +13,7 @@ const PARAKEET_SPEED: f32 = 400.0;
 const INVADER_SPEED: f32 = 100.0;
 const INVADER_ROWS: u32 = 3;
 const INVADER_COLS: u32 = 7;
+const BULLET_SIZE: Vec2 = Vec2::new(15.0, 15.0);
 
 fn setup(mut commands: Commands) {
     commands.spawn(Camera2d);

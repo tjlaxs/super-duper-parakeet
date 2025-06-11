@@ -1,6 +1,7 @@
 use crate::bullet::Bullet;
-use crate::{INVADER_COLS, INVADER_ROWS, INVADER_SPEED, PARAKEET_SIZE};
+use crate::{BULLET_SIZE, INVADER_COLS, INVADER_ROWS, INVADER_SPEED, PARAKEET_SIZE};
 use bevy::math::bounding::{Aabb2d, IntersectsVolume};
+use bevy::platform::collections::HashSet;
 use bevy::prelude::*;
 
 #[derive(Clone, Copy)]
@@ -59,15 +60,19 @@ fn collider(
     bullets: Query<(Entity, &Transform), With<Bullet>>,
     invaders: Query<(Entity, &Transform), With<Invader>>,
 ) {
+    let mut removable = HashSet::new();
     for (be, bt) in bullets {
         for (ie, it) in invaders {
-            let bullet_aabb = Aabb2d::new(bt.translation.xy(), PARAKEET_SIZE / 2.0 / 5.0);
+            let bullet_aabb = Aabb2d::new(bt.translation.xy(), BULLET_SIZE / 2.0);
             let invader_aabb = Aabb2d::new(it.translation.xy(), PARAKEET_SIZE / 2.0);
             if bullet_aabb.intersects(&invader_aabb) {
-                commands.entity(be).despawn();
-                commands.entity(ie).despawn();
+                removable.insert(be);
+                removable.insert(ie);
             }
         }
+    }
+    for entity in removable {
+        commands.entity(entity).despawn();
     }
 }
 
