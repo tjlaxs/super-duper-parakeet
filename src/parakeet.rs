@@ -1,5 +1,5 @@
 use crate::bullet::Bullet;
-use crate::{PARAKEET_SIZE, PARAKEET_SPEED};
+use crate::{BULLET_SIZE, PARAKEET_SIZE, PARAKEET_SPEED};
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -35,8 +35,7 @@ fn shoot(
     if input.just_pressed(KeyCode::KeyF) {
         commands.spawn((
             Bullet(200.),
-            Transform::from_translation(parakeet.translation)
-                .with_scale(PARAKEET_SIZE.extend(1.0) * 0.2),
+            Transform::from_translation(parakeet.translation).with_scale(BULLET_SIZE.extend(1.0)),
             Sprite::from_color(Color::hsl(50., 0.5, 0.5), Vec2::ONE),
         ));
     }
