@@ -1,6 +1,8 @@
 name: update deps
 run-name: ${{ github.actor }} running update
-on: [push]
+on:
+  push:
+    - main
 
 env:
   CARGO_TERM_COLOR: always
@@ -14,6 +16,8 @@ env:
 jobs:
   update:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -43,4 +47,16 @@ jobs:
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
       - name: Commit
         if: steps.build.outcome == 'success'
-        run: echo "ok"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILE_TO_COMMIT: Cargo.lock
+          DESTINATION_BRANCH: main
+        run: |
+          export TODAY=$( date -u '+%Y-%m-%d' )
+          export MESSAGE="chore: regenerate $FILE_TO_COMMIT for $TODAY"
+          export SHA=$( git rev-parse $DESTINATION_BRANCH:$FILE_TO_COMMIT )
+          gh api --method PUT /repos/:owner/:repo/contents/$FILE_TO_COMMIT \
+            --field message="$MESSAGE" \
+            --field content=@<( base64 -i $FILE_TO_COMMIT ) \
+            --field branch="$DESTINATION_BRANCH" \
+            --field sha="$SHA"
