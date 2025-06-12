@@ -2,7 +2,8 @@ name: update deps
 run-name: ${{ github.actor }} running update
 on:
   push:
-    - main
+    branches:
+      - main
 
 env:
   CARGO_TERM_COLOR: always
