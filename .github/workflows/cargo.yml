@@ -47,17 +47,18 @@ jobs:
         env:
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
       - name: Commit
+        continue-on-error: true
         if: steps.build.outcome == 'success'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FILE_TO_COMMIT: Cargo.lock
-          DESTINATION_BRANCH: main
         run: |
           export TODAY=$( date -u '+%Y-%m-%d' )
-          export MESSAGE="chore: regenerate $FILE_TO_COMMIT for $TODAY"
-          export SHA=$( git rev-parse $DESTINATION_BRANCH:$FILE_TO_COMMIT )
-          gh api --method PUT /repos/:owner/:repo/contents/$FILE_TO_COMMIT \
+          export MESSAGE="chore: regenerate Cargo.lock for $TODAY"
+          export SHA=$( git rev-parse main:Cargo.lock )
+          if git diff --diff-filter=ACMUXTR --name-only | grep -q "^Cargo.lock$"; then \
+          gh api --method PUT /repos/:owner/:repo/contents/Cargo.lock \
             --field message="$MESSAGE" \
-            --field content=@<( base64 -i $FILE_TO_COMMIT ) \
-            --field branch="$DESTINATION_BRANCH" \
-            --field sha="$SHA"
+            --field content=@<( base64 -i Cargo.lock ) \
+            --field branch="main" \
+            --field sha="$SHA"; \
+          fi
