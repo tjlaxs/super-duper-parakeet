@@ -52,8 +52,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          export TODAY=$( date -u '+%Y-%m-%d' )
-          export MESSAGE="chore: regenerate Cargo.lock for $TODAY"
+          export TODAY=$( date -u '+%Y-%m-%d %H:%M' )
+          export MESSAGE="chore: regenerate Cargo.lock for $TODAY (UTC)"
           export SHA=$( git rev-parse main:Cargo.lock )
           if git diff --diff-filter=ACMUXTR --name-only | grep -q "^Cargo.lock$"; then \
           gh api --method PUT /repos/:owner/:repo/contents/Cargo.lock \
